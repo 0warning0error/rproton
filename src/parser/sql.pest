@@ -1,0 +1,1149 @@
+// ClickHouseLexer.pest
+
+// End of Input
+_EOI = _{ !ANY }
+
+// Comments
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "--" ~ (!("\n" | "\r") ~ ANY)* }
+
+// Whitespace characters
+WHITESPACE = _{ " " | "\u{000B}" | "\u{000C}" | "\t" | "\r" | "\n" }
+
+// Skipped tokens (whitespace and comments)
+SKIP = _{ WHITESPACE | COMMENT }
+
+// Identifiers
+IDENTIFIER = @{
+    (ASCII_ALPHABETIC | "_") ~ (ASCII_ALPHANUMERIC | "_")* |
+    "`" ~ (!"`" ~ ANY)* ~ "`" |
+    "\"" ~ (!"\"" ~ ANY)* ~ "\""
+}
+
+// Literals
+FLOATING_LITERAL = @{
+    HEXADECIMAL_LITERAL ~ "." ~ HEX_DIGIT* ~ ("p" | "P") ~ ("+" | "-")? ~ DECIMAL_LITERAL |
+    HEXADECIMAL_LITERAL ~ ("p" | "P") ~ ("+" | "-")? ~ DECIMAL_LITERAL |
+    DECIMAL_LITERAL ~ "." ~ DECIMAL_LITERAL* ~ ("e" | "E") ~ ("+" | "-")? ~ DECIMAL_LITERAL |
+    "." ~ DECIMAL_LITERAL ~ ("e" | "E") ~ ("+" | "-")? ~ DECIMAL_LITERAL |
+    DECIMAL_LITERAL ~ ("e" | "E") ~ ("+" | "-")? ~ DECIMAL_LITERAL
+}
+OCTAL_LITERAL = @{ "0" ~ ASCII_OCTAL* }
+DECIMAL_LITERAL = @{ ASCII_DIGIT+ }
+HEXADECIMAL_LITERAL = @{ "0" ~ ("x" | "X") ~ HEX_DIGIT+ }
+STRING_LITERAL = @{ "'" ~ (("\\'" | !"'") ~ ANY)* ~ "'" }
+
+// Punctuation and operators
+ARROW = { "->" }
+ASTERISK = { "*" }
+BACKQUOTE = { "`" }
+BACKSLASH = { "\\" }
+COLON = { ":" }
+COMMA = { "," }
+CONCAT = { "||" }
+DASH = { "-" }
+DOT = { "." }
+EQ_DOUBLE = { "==" }
+EQ_SINGLE = { "=" }
+GE = { ">=" }
+GT = { ">" }
+LBRACE = { "{" }
+LBRACKET = { "[" }
+LE = { "<=" }
+LPAREN = { "(" }
+LT = { "<" }
+NOT_EQ = { "!=" | "<>" }
+PERCENT = { "%" }
+PLUS = { "+" }
+QUERY = { "?" }
+QUOTE_DOUBLE = { "\"" }
+QUOTE_SINGLE = { "'" }
+RBRACE = { "}" }
+RBRACKET = { "]" }
+RPAREN = { ")" }
+SEMICOLON = { ";" }
+SLASH = { "/" }
+UNDERSCORE = { "_" }
+
+// Character classes
+ASCII_ALPHABETIC = _{ 'a'..'z' | 'A'..'Z' }
+ASCII_DIGIT = _{ '0'..'9' }
+ASCII_ALPHANUMERIC = _{ ASCII_ALPHABETIC | ASCII_DIGIT }
+ASCII_OCTAL = _{ '0'..'7' }
+HEX_DIGIT = _{ '0'..'9' | 'a'..'f' | 'A'..'F' }
+
+// Keywords
+ADD = { ^"ADD" }
+AFTER = { ^"AFTER" }
+ALIAS = { ^"ALIAS" }
+ALL = { ^"ALL" }
+ALTER = { ^"ALTER" }
+AND = { ^"AND" }
+ANTI_JOIN = { ^"ANTI" }
+ANY_JOIN = { ^"ANY" }
+ARRAY = { ^"ARRAY" }
+AS = { ^"AS" }
+ASCENDING = { ^"ASC" | ^"ASCENDING" }
+ASOF = { ^"ASOF" }
+AST = { ^"AST" }
+ASYNC = { ^"ASYNC" }
+ATTACH = { ^"ATTACH" }
+BETWEEN = { ^"BETWEEN" }
+BOTH = { ^"BOTH" }
+BY = { ^"BY" }
+CASE = { ^"CASE" }
+CAST = { ^"CAST" }
+CHECK = { ^"CHECK" }
+CLEAR = { ^"CLEAR" }
+CLUSTER = { ^"CLUSTER" }
+CODEC = { ^"CODEC" }
+COLLATE = { ^"COLLATE" }
+COLUMN = { ^"COLUMN" }
+COMMENT_KEYWORD = { ^"COMMENT" }
+CONSTRAINT = { ^"CONSTRAINT" }
+CREATE = { ^"CREATE" }
+CROSS = { ^"CROSS" }
+CUBE = { ^"CUBE" }
+CURRENT = { ^"CURRENT" }
+DATABASE = { ^"DATABASE" }
+DATABASES = { ^"DATABASES" }
+DATE = { ^"DATE" }
+DAY = { ^"DAY" }
+DEDUPLICATE = { ^"DEDUPLICATE" }
+DEFAULT = { ^"DEFAULT" }
+DELAY = { ^"DELAY" }
+DELETE = { ^"DELETE" }
+DESC = { ^"DESC" }
+DESCENDING = { ^"DESCENDING" }
+DESCRIBE = { ^"DESCRIBE" }
+DETACH = { ^"DETACH" }
+DICTIONARIES = { ^"DICTIONARIES" }
+DICTIONARY = { ^"DICTIONARY" }
+DISK = { ^"DISK" }
+DISTINCT = { ^"DISTINCT" }
+DISTRIBUTED = { ^"DISTRIBUTED" }
+DROP_KEYWORD = { ^"DROP" }
+ELSE = { ^"ELSE" }
+END = { ^"END" }
+ENGINE = { ^"ENGINE" }
+EVENTS = { ^"EVENTS" }
+EXISTS = { ^"EXISTS" }
+EXPLAIN = { ^"EXPLAIN" }
+EXPRESSION = { ^"EXPRESSION" }
+EXTRACT = { ^"EXTRACT" }
+FETCHES = { ^"FETCHES" }
+FINAL = { ^"FINAL" }
+FIRST = { ^"FIRST" }
+FLUSH = { ^"FLUSH" }
+FOLLOWING = { ^"FOLLOWING" }
+FOR = { ^"FOR" }
+FORMAT = { ^"FORMAT" }
+FREEZE = { ^"FREEZE" }
+FROM = { ^"FROM" }
+FULL = { ^"FULL" }
+FUNCTION = { ^"FUNCTION" }
+GLOBAL = { ^"GLOBAL" }
+GRANULARITY = { ^"GRANULARITY" }
+GROUP = { ^"GROUP" }
+HAVING = { ^"HAVING" }
+HIERARCHICAL = { ^"HIERARCHICAL" }
+HOUR = { ^"HOUR" }
+ID = { ^"ID" }
+IF = { ^"IF" }
+ILIKE = { ^"ILIKE" }
+IN = { ^"IN" }
+INDEX = { ^"INDEX" }
+INF = { ^"INF" | ^"INFINITY" }
+INJECTIVE = { ^"INJECTIVE" }
+INNER = { ^"INNER" }
+INSERT = { ^"INSERT" }
+INTERVAL = { ^"INTERVAL" }
+INTO = { ^"INTO" }
+IS = { ^"IS" }
+IS_OBJECT_ID = { ^"IS_OBJECT_ID" }
+JOIN = { ^"JOIN" }
+KEY = { ^"KEY" }
+KILL = { ^"KILL" }
+LAST = { ^"LAST" }
+LAYOUT = { ^"LAYOUT" }
+LEADING = { ^"LEADING" }
+LEFT = { ^"LEFT" }
+LIFETIME = { ^"LIFETIME" }
+LIKE = { ^"LIKE" }
+LIMIT = { ^"LIMIT" }
+LIVE = { ^"LIVE" }
+LOCAL = { ^"LOCAL" }
+LOGS = { ^"LOGS" }
+MATERIALIZE = { ^"MATERIALIZE" }
+MATERIALIZED = { ^"MATERIALIZED" }
+MAX = { ^"MAX" }
+MERGES = { ^"MERGES" }
+MIN = { ^"MIN" }
+MINUTE = { ^"MINUTE" }
+MODIFY = { ^"MODIFY" }
+MONTH = { ^"MONTH" }
+MOVE = { ^"MOVE" }
+MUTATION = { ^"MUTATION" }
+NAN_SQL = { ^"NAN" }
+NO = { ^"NO" }
+NOT = { ^"NOT" }
+NULL_SQL = { ^"NULL" }
+NULLS = { ^"NULLS" }
+OFFSET = { ^"OFFSET" }
+ON = { ^"ON" }
+OPTIMIZE = { ^"OPTIMIZE" }
+OR = { ^"OR" }
+ORDER = { ^"ORDER" }
+OUTER = { ^"OUTER" }
+OUTFILE = { ^"OUTFILE" }
+OVER = { ^"OVER" }
+PARTITION = { ^"PARTITION" }
+POPULATE = { ^"POPULATE" }
+PRECEDING = { ^"PRECEDING" }
+PREWHERE = { ^"PREWHERE" }
+PRIMARY = { ^"PRIMARY" }
+PROJECTION = { ^"PROJECTION" }
+QUARTER = { ^"QUARTER" }
+RANGE = { ^"RANGE" ~ STREAM }
+RANDOM_STREAM = { ^"RANDOM" ~ STREAM }
+RELOAD = { ^"RELOAD" }
+REMOVE = { ^"REMOVE" }
+RENAME = { ^"RENAME" }
+REPLACE = { ^"REPLACE" }
+REPLICA = { ^"REPLICA" }
+REPLICATED = { ^"REPLICATED" }
+RIGHT = { ^"RIGHT" }
+ROLLUP = { ^"ROLLUP" }
+ROW = { ^"ROW" }
+ROWS = { ^"ROWS" }
+SAMPLE = { ^"SAMPLE" }
+SECOND = { ^"SECOND" }
+SELECT = { ^"SELECT" }
+SEMI = { ^"SEMI" }
+SENDS = { ^"SENDS" }
+SET = { ^"SET" }
+SETTINGS = { ^"SETTINGS" }
+SHOW = { ^"SHOW" }
+SOURCE = { ^"SOURCE" }
+START = { ^"START" }
+STOP = { ^"STOP" }
+STREAM = { ^"STREAM" }
+SUBSTRING = { ^"SUBSTRING" }
+SYNC = { ^"SYNC" }
+SYNTAX = { ^"SYNTAX" }
+SYSTEM = { ^"SYSTEM" }
+TABLE = { ^"TABLE" }
+TABLES = { ^"TABLES" }
+TEMPORARY = { ^"TEMPORARY" }
+TEST = { ^"TEST" }
+THEN = { ^"THEN" }
+TIES = { ^"TIES" }
+TIMEOUT = { ^"TIMEOUT" }
+TIMESTAMP = { ^"TIMESTAMP" }
+TO = { ^"TO" }
+TOP = { ^"TOP" }
+TOTALS = { ^"TOTALS" }
+TRAILING = { ^"TRAILING" }
+TRIM = { ^"TRIM" }
+TRUNCATE = { ^"TRUNCATE" }
+TTL = { ^"TTL" }
+TYPE = { ^"TYPE" }
+UNBOUNDED = { ^"UNBOUNDED" }
+UNION = { ^"UNION" }
+UPDATE = { ^"UPDATE" }
+USE = { ^"USE" }
+USING = { ^"USING" }
+UUID = { ^"UUID" }
+VALUES = { ^"VALUES" }
+VIEW = { ^"VIEW" }
+VOLUME = { ^"VOLUME" }
+WATCH = { ^"WATCH" }
+WEEK = { ^"WEEK" }
+WHEN = { ^"WHEN" }
+WHERE = { ^"WHERE" }
+WINDOW = { ^"WINDOW" }
+WITH = { ^"WITH" }
+YEAR = { ^"YEAR" | ^"YYYY" }
+
+// JSON literals
+JSON_FALSE = { ^"false" }
+JSON_TRUE = { ^"true" }
+// ClickHouseParser.pest
+
+sql = { SOI ~ queryStmt* ~ EOI }
+
+// Query Statement
+queryStmt = {
+    COMMENT* ~ query ~ (INTO ~ OUTFILE ~ STRING_LITERAL)? ~ (FORMAT ~ identifierOrNull)? ~ SEMICOLON? |
+    insertStmt
+}
+
+// Query
+query = {
+    alterStmt |
+    attachStmt |
+    checkStmt |
+    createStmt |
+    describeStmt |
+    dropStmt |
+    existsStmt |
+    explainStmt |
+    killStmt |
+    optimizeStmt |
+    renameStmt |
+    selectUnionStmt |
+    setStmt |
+    showStmt |
+    systemStmt |
+    truncateStmt |
+    useStmt |
+    watchStmt
+}
+
+nestedIdentifier = { identifier ~ (DOT ~ identifier)? }
+
+// Alter Statement
+alterStmt = {
+    ALTER ~ TABLE ~ tableIdentifier ~ clusterClause? ~ alterTableClause ~ (COMMA ~ alterTableClause)*
+}
+
+// Alter Table Clause
+alterTableClause = {
+    ADD ~ COLUMN ~ (IF ~ NOT ~ EXISTS)? ~ tableColumnDfnt ~ (AFTER ~ nestedIdentifier)? |
+    ADD ~ INDEX ~ (IF ~ NOT ~ EXISTS)? ~ tableIndexDfnt ~ (AFTER ~ nestedIdentifier)? |
+    ADD ~ PROJECTION ~ (IF ~ NOT ~ EXISTS)? ~ tableProjectionDfnt ~ (AFTER ~ nestedIdentifier)? |
+    ATTACH ~ partitionClause ~ (FROM ~ tableIdentifier)? |
+    CLEAR ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ (IN ~ partitionClause)? |
+    CLEAR ~ INDEX ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ (IN ~ partitionClause)? |
+    CLEAR ~ PROJECTION ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ (IN ~ partitionClause)? |
+    COMMENT_KEYWORD ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ STRING_LITERAL |
+    DELETE ~ WHERE ~ columnExpr |
+    DETACH ~ partitionClause |
+    DROP_KEYWORD ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier |
+    DROP_KEYWORD ~ INDEX ~ (IF ~ EXISTS)? ~ nestedIdentifier |
+    DROP_KEYWORD ~ PROJECTION ~ (IF ~ EXISTS)? ~ nestedIdentifier |
+    DROP_KEYWORD ~ partitionClause |
+    FREEZE ~ partitionClause? |
+    MATERIALIZE ~ INDEX ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ (IN ~ partitionClause)? |
+    MATERIALIZE ~ PROJECTION ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ (IN ~ partitionClause)? |
+    MODIFY ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ codecExpr |
+    MODIFY ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ COMMENT_KEYWORD ~ STRING_LITERAL |
+    MODIFY ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ REMOVE ~ tableColumnPropertyType |
+    MODIFY ~ COLUMN ~ (IF ~ EXISTS)? ~ tableColumnDfnt |
+    MODIFY ~ ORDER ~ BY ~ columnExpr |
+    MODIFY ~ ttlClause |
+    MOVE ~ partitionClause ~ (
+        TO ~ DISK ~ STRING_LITERAL |
+        TO ~ VOLUME ~ STRING_LITERAL |
+        TO ~ TABLE ~ tableIdentifier
+    ) |
+    REMOVE ~ TTL |
+    RENAME ~ COLUMN ~ (IF ~ EXISTS)? ~ nestedIdentifier ~ TO ~ nestedIdentifier |
+    REPLACE ~ partitionClause ~ FROM ~ tableIdentifier |
+    UPDATE ~ assignmentExprList ~ whereClause
+}
+
+// Assignment Expressions
+assignmentExprList = { assignmentExpr ~ (COMMA ~ assignmentExpr)* }
+assignmentExpr = { nestedIdentifier ~ EQ_SINGLE ~ columnExpr }
+
+// Table Column Property Types
+tableColumnPropertyType = { ALIAS | CODEC | COMMENT_KEYWORD | DEFAULT | MATERIALIZED | TTL }
+
+// Partition Clause
+partitionClause = { PARTITION ~ columnExpr | PARTITION ~ ID ~ STRING_LITERAL }
+
+// Attach Statement
+attachStmt = { ATTACH ~ DICTIONARY ~ tableIdentifier ~ clusterClause? }
+
+// Check Statement
+checkStmt = { CHECK ~ TABLE ~ tableIdentifier ~ partitionClause? }
+
+// Create Statement
+createStmt = {
+    (ATTACH | CREATE) ~ DATABASE ~ (IF ~ NOT ~ EXISTS)? ~ databaseIdentifier ~ clusterClause? ~ engineExpr? |
+    (ATTACH | CREATE ~ (OR ~ REPLACE)? | REPLACE) ~ DICTIONARY ~ (IF ~ NOT ~ EXISTS)? ~ tableIdentifier ~ uuidClause? ~ clusterClause? ~ dictionarySchemaClause ~ dictionaryEngineClause |
+    (ATTACH | CREATE) ~ LIVE ~ VIEW ~ (IF ~ NOT ~ EXISTS)? ~ tableIdentifier ~ uuidClause? ~ clusterClause? ~ (WITH ~ TIMEOUT ~ DECIMAL_LITERAL?)? ~ destinationClause? ~ tableSchemaClause? ~ subqueryClause |
+    (ATTACH | CREATE) ~ MATERIALIZED ~ VIEW ~ (IF ~ NOT ~ EXISTS)? ~ tableIdentifier ~ uuidClause? ~ clusterClause? ~ tableSchemaClause? ~ (destinationClause | engineClause ~ POPULATE?) ~ subqueryClause |
+    (ATTACH | CREATE ~ (OR ~ REPLACE)? | REPLACE) ~ TEMPORARY? ~ TABLE ~ (IF ~ NOT ~ EXISTS)? ~ tableIdentifier ~ uuidClause? ~ clusterClause? ~ tableSchemaClause? ~ engineClause? ~ subqueryClause? |
+    (ATTACH | CREATE) ~ (OR ~ REPLACE)? ~ VIEW ~ (IF ~ NOT ~ EXISTS)? ~ tableIdentifier ~ uuidClause? ~ clusterClause? ~ tableSchemaClause? ~ subqueryClause |
+	(ATTACH | CREATE ~ (OR ~ REPLACE)? | REPLACE) ~ RANDOM_STREAM ~ (IF ~ NOT ~ EXISTS)? ~ tableIdentifier ~ uuidClause? ~ clusterClause? ~ tableSchemaClause? ~ engineClause? ~ subqueryClause? 
+}
+
+// Dictionary Schema Clause
+dictionarySchemaClause = { LPAREN ~ dictionaryAttrDfnt ~ (COMMA ~ dictionaryAttrDfnt)* ~ RPAREN }
+
+// Dictionary Attribute Definition
+dictionaryAttrDfnt = {
+    identifier ~ columnTypeExpr ~ (
+        DEFAULT ~ literal |
+        EXPRESSION ~ columnExpr |
+        HIERARCHICAL |
+        INJECTIVE |
+        IS_OBJECT_ID
+    )*
+}
+
+// Dictionary Engine Clause
+dictionaryEngineClause = {
+    dictionaryPrimaryKeyClause? ~ (
+        sourceClause |
+        lifetimeClause |
+        layoutClause |
+        rangeClause |
+        dictionarySettingsClause
+    )*
+}
+
+// Dictionary Primary Key Clause
+dictionaryPrimaryKeyClause = { PRIMARY ~ KEY ~ columnExprList }
+
+// Dictionary Argument Expression
+dictionaryArgExpr = { identifier ~ (identifier ~ (LPAREN ~ RPAREN)? | literal) }
+
+// Source Clause
+sourceClause = {
+    SOURCE ~ LPAREN ~ identifier ~ LPAREN ~ dictionaryArgExpr* ~ RPAREN ~ RPAREN
+}
+
+// Lifetime Clause
+lifetimeClause = {
+    LIFETIME ~ LPAREN ~ (
+        DECIMAL_LITERAL |
+        MIN ~ DECIMAL_LITERAL ~ MAX ~ DECIMAL_LITERAL |
+        MAX ~ DECIMAL_LITERAL ~ MIN ~ DECIMAL_LITERAL
+    ) ~ RPAREN
+}
+
+// Layout Clause
+layoutClause = {
+    LAYOUT ~ LPAREN ~ identifier ~ LPAREN ~ dictionaryArgExpr* ~ RPAREN ~ RPAREN
+}
+
+// Range Clause
+rangeClause = {
+    RANGE ~ LPAREN ~ (
+        MIN ~ identifier ~ MAX ~ identifier |
+        MAX ~ identifier ~ MIN ~ identifier
+    ) ~ RPAREN
+}
+
+// Dictionary Settings Clause
+dictionarySettingsClause = { SETTINGS ~ LPAREN ~ settingExprList ~ RPAREN }
+
+// Cluster Clause
+clusterClause = { ON ~ CLUSTER ~ (identifier | STRING_LITERAL) }
+
+// UUID Clause
+uuidClause = { UUID ~ STRING_LITERAL }
+
+// Destination Clause
+destinationClause = { TO ~ tableIdentifier }
+
+// Subquery Clause
+subqueryClause = { AS ~ selectUnionStmt }
+
+// Table Schema Clause
+tableSchemaClause = {
+    LPAREN ~ tableElementExpr ~ (COMMA ~ tableElementExpr)* ~ RPAREN |
+    AS ~ tableIdentifier |
+    AS ~ tableFunctionExpr
+}
+
+// Engine Clause
+engineClause = {
+    engineExpr ~ (
+        orderByClause |
+        partitionByClause |
+        primaryKeyClause |
+        sampleByClause |
+        ttlClause |
+        settingsClause
+    )*
+}
+
+// Partition By Clause
+partitionByClause = { PARTITION ~ BY ~ columnExpr }
+
+// Primary Key Clause
+primaryKeyClause = { PRIMARY ~ KEY ~ columnExpr }
+
+// Sample By Clause
+sampleByClause = { SAMPLE ~ BY ~ columnExpr }
+
+// TTL Clause
+ttlClause = { TTL ~ ttlExpr ~ (COMMA ~ ttlExpr)* }
+
+// Engine Expression
+engineExpr = {
+    ENGINE ~ EQ_SINGLE? ~ identifierOrNull ~ (LPAREN ~ columnExprList? ~ RPAREN)?
+}
+
+// Table Element Expression
+tableElementExpr = {
+    tableColumnDfnt |
+    CONSTRAINT ~ identifier ~ CHECK ~ columnExpr |
+    INDEX ~ tableIndexDfnt |
+    PROJECTION ~ tableProjectionDfnt
+}
+
+// Table Column Definition
+tableColumnDfnt = {
+    nestedIdentifier ~ columnTypeExpr ~ tableColumnPropertyExpr? ~ (COMMENT_KEYWORD ~ STRING_LITERAL)? ~ codecExpr? ~ (TTL ~ columnExpr)? |
+    nestedIdentifier ~ columnTypeExpr? ~ tableColumnPropertyExpr ~ (COMMENT_KEYWORD ~ STRING_LITERAL)? ~ codecExpr? ~ (TTL ~ columnExpr)?
+}
+
+// Table Column Property Expression
+tableColumnPropertyExpr = {
+    (DEFAULT | MATERIALIZED | ALIAS) ~ columnExpr
+}
+
+// Table Index Definition
+tableIndexDfnt = {
+    nestedIdentifier ~ columnExpr ~ TYPE ~ columnTypeExpr ~ GRANULARITY ~ DECIMAL_LITERAL
+}
+
+// Table Projection Definition
+tableProjectionDfnt = { nestedIdentifier ~ projectionSelectStmt }
+
+// Codec Expression
+codecExpr = {
+    CODEC ~ LPAREN ~ codecArgExpr ~ (COMMA ~ codecArgExpr)* ~ RPAREN
+}
+
+// Codec Argument Expression
+codecArgExpr = {
+    identifier ~ (LPAREN ~ columnExprList? ~ RPAREN)?
+}
+
+// TTL Expression
+ttlExpr = {
+    columnExpr ~ (
+        DELETE |
+        TO ~ DISK ~ STRING_LITERAL |
+        TO ~ VOLUME ~ STRING_LITERAL
+    )?
+}
+
+// Describe Statement
+describeStmt = {
+    (DESCRIBE | DESC) ~ TABLE? ~ tableExpr
+}
+
+// Drop Statement
+dropStmt = {
+    (DETACH | DROP_KEYWORD) ~ DATABASE ~ (IF ~ EXISTS)? ~ databaseIdentifier ~ clusterClause? |
+    (DETACH | DROP_KEYWORD) ~ (DICTIONARY | TEMPORARY? ~ TABLE | VIEW) ~ (IF ~ EXISTS)? ~ tableIdentifier ~ clusterClause? ~ (NO ~ DELAY)?
+}
+
+// Exists Statement
+existsStmt = {
+    EXISTS ~ DATABASE ~ databaseIdentifier |
+    EXISTS ~ (DICTIONARY | TEMPORARY? ~ TABLE | VIEW)? ~ tableIdentifier
+}
+
+// Explain Statement
+explainStmt = {
+    EXPLAIN ~ AST ~ query |
+    EXPLAIN ~ SYNTAX ~ query
+}
+
+// Insert Statement
+insertStmt = {
+    INSERT ~ INTO ~ TABLE? ~ (tableIdentifier | FUNCTION ~ tableFunctionExpr) ~ columnsClause? ~ dataClause
+}
+
+// Columns Clause
+columnsClause = { LPAREN ~ nestedIdentifier ~ (COMMA ~ nestedIdentifier)* ~ RPAREN }
+
+// Data Clause
+dataClause = {
+    FORMAT ~ identifier |
+    VALUES |
+    selectUnionStmt ~ SEMICOLON? ~ _EOI
+}
+
+// Kill Statement
+killStmt = {
+    KILL ~ MUTATION ~ clusterClause? ~ whereClause ~ (SYNC | ASYNC | TEST)?
+}
+
+// Optimize Statement
+optimizeStmt = {
+    OPTIMIZE ~ TABLE ~ tableIdentifier ~ clusterClause? ~ partitionClause? ~ FINAL? ~ DEDUPLICATE?
+}
+
+// Rename Statement
+renameStmt = {
+    RENAME ~ TABLE ~ tableIdentifier ~ TO ~ tableIdentifier ~ (COMMA ~ tableIdentifier ~ TO ~ tableIdentifier)* ~ clusterClause?
+}
+
+// Projection Select Statement
+projectionSelectStmt = {
+    LPAREN ~ withClause? ~ SELECT ~ columnExprList ~ groupByClause? ~ projectionOrderByClause? ~ RPAREN
+}
+
+// Select Union Statement
+selectUnionStmt = {
+    selectStmtWithParens ~ (UNION ~ ALL ~ selectStmtWithParens)*
+}
+
+// Select Statement With Parentheses
+selectStmtWithParens = {
+    selectStmt |
+    LPAREN ~ selectUnionStmt ~ RPAREN
+}
+
+// Select Statement
+selectStmt = {
+    withClause? ~ SELECT ~ STREAM? ~ DISTINCT? ~ topClause? ~ columnExprList ~ fromClause? ~ arrayJoinClause? ~ windowClause? ~ prewhereClause? ~ whereClause? ~ groupByClause? ~ (WITH ~ (CUBE | ROLLUP))? ~ (WITH ~ TOTALS)? ~ havingClause? ~ orderByClause? ~ limitByClause? ~ limitClause? ~ settingsClause?
+}
+
+// With Clause
+withClause = { WITH ~ columnExprList }
+
+// Top Clause
+topClause = { TOP ~ DECIMAL_LITERAL ~ (WITH ~ TIES)? }
+
+// From Clause
+fromClause = { FROM ~ joinExpr }
+
+// Array Join Clause
+arrayJoinClause = { (LEFT | INNER)? ~ ARRAY ~ JOIN ~ columnExprList }
+
+// Window Clause
+windowClause = {
+    WINDOW ~ identifier ~ AS ~ LPAREN ~ windowExpr ~ RPAREN
+}
+
+// Prewhere Clause
+prewhereClause = { PREWHERE ~ columnExpr }
+
+// Where Clause
+whereClause = { WHERE ~ columnExpr }
+
+// Group By Clause
+groupByClause = {
+    GROUP ~ BY ~ (
+        (CUBE | ROLLUP) ~ LPAREN ~ columnExprList ~ RPAREN |
+        columnExprList
+    )
+}
+
+// Having Clause
+havingClause = { HAVING ~ columnExpr }
+
+// Order By Clause
+orderByClause = { ORDER ~ BY ~ orderExprList }
+
+// Projection Order By Clause
+projectionOrderByClause = { ORDER ~ BY ~ columnExprList }
+
+// Limit By Clause
+limitByClause = { LIMIT ~ limitExpr ~ BY ~ columnExprList }
+
+// Limit Clause
+limitClause = { LIMIT ~ limitExpr ~ (WITH ~ TIES)? }
+
+// Settings Clause
+settingsClause = { SETTINGS ~ settingExprList }
+
+// Join Expression
+joinExpr = _{
+    tableExpr ~ FINAL? ~ sampleClause? ~ joinExprRest*
+}
+
+// Join Expression Rest
+joinExprRest = {
+    (GLOBAL | LOCAL)? ~ joinOp? ~ JOIN ~ joinExpr ~ joinConstraintClause |
+    joinOpCross ~ joinExpr |
+    LPAREN ~ joinExpr ~ RPAREN
+}
+
+// Join Operation
+joinOp = {
+    ((ALL | ANY_JOIN | ASOF)? ~ INNER | INNER ~ (ALL | ANY_JOIN | ASOF)? | (ALL | ANY_JOIN | ASOF)) |
+    ((SEMI | ALL | ANTI_JOIN | ANY_JOIN | ASOF)? ~ (LEFT | RIGHT) ~ OUTER? | (LEFT | RIGHT) ~ OUTER? ~ (SEMI | ALL | ANTI_JOIN | ANY_JOIN | ASOF)?) |
+    ((ALL | ANY_JOIN)? ~ FULL ~ OUTER? | FULL ~ OUTER? ~ (ALL | ANY_JOIN)?)
+}
+
+// Join Operation Cross
+joinOpCross = {
+    (GLOBAL | LOCAL)? ~ CROSS ~ JOIN |
+    COMMA
+}
+
+// Join Constraint Clause
+joinConstraintClause = {
+    ON ~ columnExprList |
+    USING ~ LPAREN ~ columnExprList ~ RPAREN |
+    USING ~ columnExprList
+}
+
+// Sample Clause
+sampleClause = {
+    SAMPLE ~ ratioExpr ~ (OFFSET ~ ratioExpr)?
+}
+
+// Limit Expression
+limitExpr = {
+    columnExpr ~ ((COMMA | OFFSET) ~ columnExpr)?
+}
+
+// Order Expression List
+orderExprList = {
+    orderExpr ~ (COMMA ~ orderExpr)*
+}
+
+// Order Expression
+orderExpr = {
+    columnExpr ~ (ASCENDING | DESCENDING | DESC)? ~ (NULLS ~ (FIRST | LAST))? ~ (COLLATE ~ STRING_LITERAL)?
+}
+
+// Ratio Expression
+ratioExpr = {
+    numberLiteral ~ (SLASH ~ numberLiteral)?
+}
+
+// Setting Expression List
+settingExprList = {
+    settingExpr ~ (COMMA ~ settingExpr)*
+}
+
+// Setting Expression
+settingExpr = {
+    identifier ~ EQ_SINGLE ~ literal
+}
+
+// Window Expression
+windowExpr = {
+    winPartitionByClause? ~ winOrderByClause? ~ winFrameClause?
+}
+
+// Window Partition By Clause
+winPartitionByClause = { PARTITION ~ BY ~ columnExprList }
+
+// Window Order By Clause
+winOrderByClause = { ORDER ~ BY ~ orderExprList }
+
+// Window Frame Clause
+winFrameClause = {
+    (ROWS | RANGE) ~ winFrameExtend
+}
+
+// Window Frame Extend
+winFrameExtend = {
+    winFrameBound |
+    BETWEEN ~ winFrameBound ~ AND ~ winFrameBound
+}
+
+// Window Frame Bound
+winFrameBound = {
+    (CURRENT ~ ROW | UNBOUNDED ~ PRECEDING | UNBOUNDED ~ FOLLOWING | numberLiteral ~ PRECEDING | numberLiteral ~ FOLLOWING)
+}
+
+// Set Statement
+setStmt = { SET ~ settingExprList }
+
+// Show Statement
+showStmt = {
+    SHOW ~ CREATE ~ DATABASE ~ databaseIdentifier |
+    SHOW ~ CREATE ~ DICTIONARY ~ tableIdentifier |
+    SHOW ~ CREATE ~ TEMPORARY? ~ TABLE? ~ tableIdentifier |
+    SHOW ~ DATABASES |
+    SHOW ~ DICTIONARIES ~ (FROM ~ databaseIdentifier)? |
+    SHOW ~ TEMPORARY? ~ TABLES ~ ((FROM | IN) ~ databaseIdentifier)? ~ (LIKE ~ STRING_LITERAL | whereClause)? ~ limitClause?
+}
+
+// System Statement
+systemStmt = {
+    SYSTEM ~ FLUSH ~ DISTRIBUTED ~ tableIdentifier |
+    SYSTEM ~ FLUSH ~ LOGS |
+    SYSTEM ~ RELOAD ~ DICTIONARIES |
+    SYSTEM ~ RELOAD ~ DICTIONARY ~ tableIdentifier |
+    SYSTEM ~ (START | STOP) ~ (DISTRIBUTED ~ SENDS | FETCHES | TTL? ~ MERGES) ~ tableIdentifier |
+    SYSTEM ~ (START | STOP) ~ REPLICATED ~ SENDS |
+    SYSTEM ~ SYNC ~ REPLICA ~ tableIdentifier
+}
+
+// Truncate Statement
+truncateStmt = {
+    TRUNCATE ~ TEMPORARY? ~ TABLE? ~ (IF ~ EXISTS)? ~ tableIdentifier ~ clusterClause?
+}
+
+// Use Statement
+useStmt = { USE ~ databaseIdentifier }
+
+// Watch Statement
+watchStmt = {
+    WATCH ~ tableIdentifier ~ EVENTS? ~ (LIMIT ~ DECIMAL_LITERAL)?
+}
+
+// Column Type Expression
+columnTypeExpr = {
+    identifier |
+    identifier ~ LPAREN ~ identifier ~ columnTypeExpr ~ (COMMA ~ identifier ~ columnTypeExpr)* ~ RPAREN |
+    identifier ~ LPAREN ~ enumValue ~ (COMMA ~ enumValue)* ~ RPAREN |
+    identifier ~ LPAREN ~ columnTypeExpr ~ (COMMA ~ columnTypeExpr)* ~ RPAREN |
+    identifier ~ LPAREN ~ columnExprList? ~ RPAREN
+}
+
+// Column Expression List
+columnExprList = {
+    columnsExpr ~ (COMMA ~ columnsExpr)*
+}
+
+// Columns Expression
+columnsExpr = {
+    (tableIdentifier ~ DOT)? ~ ASTERISK |
+    LPAREN ~ selectUnionStmt ~ RPAREN |
+    columnExpr
+}
+
+// Column Expression
+columnExpr = _{
+    primaryExpr ~ columnExprRest*
+}
+
+// Column Expression Rest
+columnExprRest = {
+    LBRACKET ~ columnExpr ~ RBRACKET |
+    DOT ~ DECIMAL_LITERAL |
+    (ASTERISK | SLASH | PERCENT) ~ columnExpr |
+    (PLUS | DASH | CONCAT) ~ columnExpr |
+    (EQ_DOUBLE | EQ_SINGLE | NOT_EQ | LE | GE | LT | GT | GLOBAL? ~ NOT? ~ IN | NOT? ~ (LIKE | ILIKE)) ~ columnExpr |
+    IS ~ NOT? ~ NULL_SQL |
+    AND ~ columnExpr |
+    OR ~ columnExpr |
+    NOT? ~ BETWEEN ~ columnExpr ~ AND ~ columnExpr |
+    (alias | AS ~ identifier)
+}
+
+// Primary Expression
+primaryExpr = _{
+    CASE ~ columnExpr? ~ (WHEN ~ columnExpr ~ THEN ~ columnExpr)+ ~ (ELSE ~ columnExpr)? ~ END |
+    CAST ~ LPAREN ~ columnExpr ~ AS ~ columnTypeExpr ~ RPAREN |
+    DATE ~ STRING_LITERAL |
+    EXTRACT ~ LPAREN ~ interval ~ FROM ~ columnExpr ~ RPAREN |
+    INTERVAL ~ columnExpr ~ interval |
+    SUBSTRING ~ LPAREN ~ columnExpr ~ FROM ~ columnExpr ~ (FOR ~ columnExpr)? ~ RPAREN |
+    TIMESTAMP ~ STRING_LITERAL |
+    TRIM ~ LPAREN ~ (BOTH | LEADING | TRAILING) ~ STRING_LITERAL ~ FROM ~ columnExpr ~ RPAREN |
+    identifier ~ (LPAREN ~ columnExprList? ~ RPAREN) ~ OVER ~ LPAREN ~ windowExpr ~ RPAREN |
+    identifier ~ (LPAREN ~ columnExprList? ~ RPAREN) ~ OVER ~ identifier |
+    identifier ~ (LPAREN ~ columnExprList? ~ RPAREN)? ~ LPAREN ~ DISTINCT? ~ columnArgList? ~ RPAREN |
+    literal |
+    DASH ~ columnExpr |
+    NOT ~ columnExpr |
+    (tableIdentifier ~ DOT)? ~ ASTERISK |
+    LPAREN ~ selectUnionStmt ~ RPAREN |
+    LPAREN ~ columnExpr ~ RPAREN |
+    LPAREN ~ columnExprList ~ RPAREN |
+    LBRACKET ~ columnExprList? ~ RBRACKET |
+    columnIdentifier
+}
+
+// Column Argument List
+columnArgList = {
+    columnArgExpr ~ (COMMA ~ columnArgExpr)*
+}
+
+// Column Argument Expression
+columnArgExpr = {
+    columnLambdaExpr |
+    columnExpr
+}
+
+// Column Lambda Expression
+columnLambdaExpr = {
+    ( LPAREN ~ identifier ~ (COMMA ~ identifier)* ~ RPAREN | identifier ~ (COMMA ~ identifier)* ) ~ ARROW ~ columnExpr
+}
+
+// Column Identifier
+columnIdentifier = {
+    (tableIdentifier ~ DOT)? ~ nestedIdentifier
+}
+
+// Table Expression
+tableExpr = _{
+    primaryTableExpr ~ tableExprRest*
+}
+
+// Table Expression Rest
+tableExprRest = {
+    (alias | AS ~ identifier)
+}
+
+// Primary Table Expression
+primaryTableExpr = _{
+    tableIdentifier |
+    tableFunctionExpr |
+    LPAREN ~ selectUnionStmt ~ RPAREN
+}
+
+// Table Function Expression
+tableFunctionExpr = {
+    identifier ~ LPAREN ~ tableArgList? ~ RPAREN
+}
+
+// Table Identifier
+tableIdentifier = {
+    (databaseIdentifier ~ DOT)? ~ identifier
+}
+
+// Table Argument List
+tableArgList = {
+    tableArgExpr ~ (COMMA ~ tableArgExpr)*
+}
+
+// Table Argument Expression
+tableArgExpr = {
+    nestedIdentifier |
+    tableFunctionExpr |
+    literal
+}
+
+// Database Identifier
+databaseIdentifier = { identifier }
+
+// Floating Literal
+floatingLiteral = {
+    FLOATING_LITERAL |
+    DOT ~ (DECIMAL_LITERAL | OCTAL_LITERAL) |
+    DECIMAL_LITERAL ~ DOT ~ (DECIMAL_LITERAL | OCTAL_LITERAL)?
+}
+
+// Number Literal
+numberLiteral = {
+    (PLUS | DASH)? ~ (
+        floatingLiteral |
+        OCTAL_LITERAL |
+        DECIMAL_LITERAL |
+        HEXADECIMAL_LITERAL |
+        INF |
+        NAN_SQL
+    )
+}
+
+// Literal
+literal = {
+    numberLiteral |
+    STRING_LITERAL |
+    NULL_SQL
+}
+
+// Interval
+interval = {
+    SECOND |
+    MINUTE |
+    HOUR |
+    DAY |
+    WEEK |
+    MONTH |
+    QUARTER |
+    YEAR
+}
+
+// Keyword
+keyword = {
+    AFTER |
+    ALIAS |
+    ALL |
+    ALTER |
+    AND |
+    ANTI_JOIN |
+    ANY_JOIN |
+    ARRAY |
+    AS |
+    ASCENDING |
+    ASOF |
+    AST |
+    ASYNC |
+    ATTACH |
+    BETWEEN |
+    BOTH |
+    BY |
+    CASE |
+    CAST |
+    CHECK |
+    CLEAR |
+    CLUSTER |
+    CODEC |
+    COLLATE |
+    COLUMN |
+    COMMENT_KEYWORD |
+    CONSTRAINT |
+    CREATE |
+    CROSS |
+    CUBE |
+    CURRENT |
+    DATABASE |
+    DATABASES |
+    DATE |
+    DEDUPLICATE |
+    DEFAULT |
+    DELAY |
+    DELETE |
+    DESCRIBE |
+    DESC |
+    DESCENDING |
+    DETACH |
+    DICTIONARIES |
+    DICTIONARY |
+    DISK |
+    DISTINCT |
+    DISTRIBUTED |
+    DROP_KEYWORD |
+    ELSE |
+    END |
+    ENGINE |
+    EVENTS |
+    EXISTS |
+    EXPLAIN |
+    EXPRESSION |
+    EXTRACT |
+    FETCHES |
+    FINAL |
+    FIRST |
+    FLUSH |
+    FOR |
+    FOLLOWING |
+    FORMAT |
+    FREEZE |
+    FROM |
+    FULL |
+    FUNCTION |
+    GLOBAL |
+    GRANULARITY |
+    GROUP |
+    HAVING |
+    HIERARCHICAL |
+    ID |
+    IF |
+    ILIKE |
+    IN |
+    INDEX |
+    INF |
+    INJECTIVE |
+    INNER |
+    INSERT |
+    INTERVAL |
+    INTO |
+    IS |
+    IS_OBJECT_ID |
+    JOIN |
+    JSON_FALSE |
+    JSON_TRUE |
+    KEY |
+    KILL |
+    LAST |
+    LAYOUT |
+    LEADING |
+    LEFT |
+    LIFETIME |
+    LIKE |
+    LIMIT |
+    LIVE |
+    LOCAL |
+    LOGS |
+    MATERIALIZE |
+    MATERIALIZED |
+    MAX |
+    MERGES |
+    MIN |
+    MODIFY |
+    MOVE |
+    MUTATION |
+    NO |
+    NOT |
+    NULLS |
+    OFFSET |
+    ON |
+    OPTIMIZE |
+    OR |
+    ORDER |
+    OUTER |
+    OUTFILE |
+    OVER |
+    PARTITION |
+    POPULATE |
+    PRECEDING |
+    PREWHERE |
+    PRIMARY |
+    PROJECTION |
+    QUARTER |
+    RANGE |
+    RELOAD |
+    REMOVE |
+    RENAME |
+    REPLACE |
+    REPLICA |
+    REPLICATED |
+    RIGHT |
+    ROLLUP |
+    ROW |
+    ROWS |
+    SAMPLE |
+    SECOND |
+    SELECT |
+    SEMI |
+    SENDS |
+    SET |
+    SETTINGS |
+    SHOW |
+    SOURCE |
+    START |
+    STOP |
+    STREAM |
+    SUBSTRING |
+    SYNC |
+    SYNTAX |
+    SYSTEM |
+    TABLE |
+    TABLES |
+    TEMPORARY |
+    TEST |
+    THEN |
+    TIES |
+    TIMEOUT |
+    TIMESTAMP |
+    TO |
+    TOP |
+    TOTALS |
+    TRAILING |
+    TRIM |
+    TRUNCATE |
+    TTL |
+    TYPE |
+    UNBOUNDED |
+    UNION |
+    UPDATE |
+    USE |
+    USING |
+    UUID |
+    VALUES |
+    VIEW |
+    VOLUME |
+    WATCH |
+    WHEN |
+    WHERE |
+    WINDOW |
+    WITH |
+    YEAR
+}
+
+// Keyword For Alias
+keywordForAlias = { DATE | FIRST | ID | KEY }
+
+// Alias
+alias = { IDENTIFIER | keywordForAlias }
+
+// Identifier
+identifier = { IDENTIFIER | interval | keyword }
+
+// Identifier Or Null
+identifierOrNull = { identifier | NULL_SQL }
+
+// Enum Value
+enumValue = {
+    STRING_LITERAL ~ EQ_SINGLE ~ numberLiteral
+}
